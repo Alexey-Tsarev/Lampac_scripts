@@ -1,0 +1,17 @@
+### IDEA
+.idea/
+
+
+### AutoIt template
+# Compiled Scripts
+*.a3x
+
+# Tidy Auto-Generated Backups
+Backup/*
+
+# Au3Stripper Auto-Generated Files
+*_stripped.au3
+
+
+in.m3u
+out.m3u
