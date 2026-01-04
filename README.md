@@ -1,5 +1,5 @@
 # Lampac scripts (Windows)
-
+# See [English version](https://github.com/Alexey-Tsarev/Lampac_scripts/blob/master/README_EN.md)
 ## Проблемы
 Этот проект я сделал, чтобы __решить__ несколько проблем:
 1. Изменение ссылки на поток. Например, [Lampac](https://github.com/immisterio/Lampac) выдаёт ссылку в виде  

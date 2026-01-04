@@ -1,4 +1,5 @@
 # Lampac scripts (Windows)
+# See [Russian version](https://github.com/Alexey-Tsarev/Lampac_scripts/blob/master/README.md)
 
 ## Problems
 This project is for resolving the following problems:
