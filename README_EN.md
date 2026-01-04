@@ -12,11 +12,11 @@ When it starts, Kodi's window stays behind the browser's window.
 3. Watch series. For example, for torrent files with many files inside, 
 a player starts from a file with `index=x`, for example, with `index=3`:  
 http://127.0.0.1:9118/ts/stream/FILE_NAME?link=LINK_ID&index=3&preload  
-After episode 3 ended, the next episode (4?) does not start automatically!
+However, after episode 3 ended, the next episode (4) does not start automatically!
 
 ## Solutions
 ### Solution 2
-To resolve 2, I select [AutoIt](https://www.autoitscript.com).
+To resolve 2, I use [AutoIt](https://www.autoitscript.com).
 ```
 WinWait("Kodi", "", 10)
 WinActivate("Kodi")
@@ -52,7 +52,7 @@ and configure Lampac to use the link [http://127.0.0.1:8090](http://127.0.0.1:80
 Resolved automatically by using `m3u`.
 
 ## Script
-In this way all needed work is happening in [run_player.au3](http://example.com/run_player.au3) script:
+In this way all needed work is happening in [run_player.au3](https://github.com/Alexey-Tsarev/Lampac_scripts/blob/master/run_player.au3) script:
 - convert URL to download `m3u` playlist
 - download `m3u` playlist
 - remove in `m3u` playlist all links before `index`
