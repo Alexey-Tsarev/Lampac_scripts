@@ -23,7 +23,7 @@ WinActivate("Kodi")
 
 Поскольку запуск скрипта AutoIt в Windows - это запуск `AutoIt3.exe script.au3`,
 то задание параметра `playerInner` не работает, - т.к. нужно дополнительно передать имя скрипта `au3` как аргумент.  
-Поэтому сделана настройка [Lampac\init.conf](http://example.com/Lampac/init.conf)
+Поэтому сделана настройка [Lampac\init.conf](https://github.com/Alexey-Tsarev/Lampac_scripts/blob/master/Lampac/init.conf)
 ```
 {
   "cmd": {
@@ -35,7 +35,7 @@ WinActivate("Kodi")
 }
 ```
 
-Для запуска плеера изменён скрипт [Lampac\plugins\player-inner.js](http://example.com/Lampac/plugins/player-inner.js)
+Для запуска плеера изменён скрипт [Lampac\plugins\player-inner.js](https://github.com/Alexey-Tsarev/Lampac_scripts/blob/master/Lampac/plugins/player-inner.js)
 ```
 $.get('{localhost}/cmd/player/' + element.url);
 ```
