@@ -4,7 +4,7 @@ if (element.url && element.isonline) {
 else if (element.url) {
   if ({useplayer}) {
     if (Platform.is('browser') && location.host.indexOf("127.0.0.1") !== -1) {
-      Noty.show('Видео открыто в playerInner: ' + element.url, {time: 3000});
+      Noty.show('Видео открыто в playerInner: {localhost}/cmd/player/' + element.url, {time: 3000});
       $.get('{localhost}/cmd/player/' + element.url);
       return;
     }

@@ -1,36 +1,33 @@
 # Lampac scripts (Windows)
-# See [Russian version](https://github.com/Alexey-Tsarev/Lampac_scripts/blob/master/README.md)
+# Read [Russian version](https://github.com/Alexey-Tsarev/Lampac_scripts/blob/master/README.md)
 
 ## Problems
 This project is for resolving the following problems:
-1. Change a link to a stream. For instance, [Lampac](https://github.com/immisterio/Lampac) outputs a link:
+1. I use [Kodi](https://kodi.tv/download/windows/) as a player. When it starts, Kodi's window stays behind the browser's window.
+2. Change a link to a stream. For instance, [Lampac](https://github.com/immisterio/Lampac) outputs a link:
 http://127.0.0.1:9118/ts/stream/FILE_NAME?link=LINK_ID&index=1&preload  
-I need to convert it to:  
-http://127.0.0.1:9118/ts/stream/FILE_NAME?link=LINK_ID&index=1&play
-2. I use [Kodi](https://kodi.tv/download/windows/) as a player.
-When it starts, Kodi's window stays behind the browser's window.
+and I need it to convert to a playlist file (`.m3u`):  
+http://127.0.0.1:8090/stream/?link=LINK_ID&m3u
 3. Watch series. For example, for torrent files with many files inside, 
 a player starts from a file with `index=x`, for example, with `index=3`:  
 http://127.0.0.1:9118/ts/stream/FILE_NAME?link=LINK_ID&index=3&preload  
-However, after episode 3 ended, the next episode (4) does not start automatically!
+However, after an episode 3 ended, the next episode (4) does not start automatically!
 
 ## Solutions
-### Solution 2
-To resolve 2, I use [AutoIt](https://www.autoitscript.com).
-```
-WinWait("Kodi", "", 10)
-WinActivate("Kodi")
-```
+### Solution 1
+The Python lib `pygetwindow` is used.
 
-Because to run an AutoIt script in Windows, you need to run `AutoIt3.exe script.au3`,
-then `playerInner` setting does not work because it's needed to provide an additional `au3` parameter as an argument.
+### Solution 2
+Because to run a Python script in Windows, you need to run `python.exe kodi.py`,
+then `playerInner` setting does not work because it's needed to provide an additional `py` parameter as an argument.
 That's why the following lines in [Lampac\init.conf](https://github.com/Alexey-Tsarev/Lampac_scripts/blob/master/Lampac/init.conf) are added:
 ```
 {
+  "playerInner": "notNull",
   "cmd": {
     "player": {
-      "path": "C:\\PF\\AutoIt\\AutoIt3_x64.exe",
-      "arguments": "C:\\PF\\Lampac_scripts\\run_player.au3 \"{value}\""
+      "path": "C:\\PF\\Lampac_scripts\\.virtualenv\\Scripts\\python.exe",
+      "arguments": "C:\\PF\\Lampac_scripts\\kodi.py --kodi-play \"{value}\""
     }
   }
 }
@@ -41,63 +38,38 @@ To run a player, this script [Lampac\plugins\player-inner.js](https://github.com
 $.get('{localhost}/cmd/player/' + element.url);
 ```
 
-### Solution 3
-To resolve 3: download an `m3u` playlist and remove all links before the `index` parameter.  
+### Solution 3 
 Because Lampac starts [TorrServer](https://github.com/YouROK/TorrServer) and proxies it through the URL
 http://127.0.0.1:9118/ts/ (add `ts`), then links inside `m3u` become invalid.  
 To resolve this, I install [TorrServer-windows-amd64.exe](https://github.com/YouROK/TorrServer/releases)
 and configure Lampac to use the link [http://127.0.0.1:8090](http://127.0.0.1:8090).
 
-### Solution 1
-Resolved automatically by using `m3u`.
+So, after an `m3u` playlist is downloaded. This playlist is opened by Kodi, using the following [JSON-RPC API](https://kodi.wiki/view/JSON-RPC_API):
+- [Playlist.Clear](https://kodi.wiki/view/JSON-RPC_API/v13#Playlist.Clear) (`"params": {"playlistid": 1}`)
+- [Playlist.Add](https://kodi.wiki/view/JSON-RPC_API/v13#Playlist.Add) (`"params": {"playlistid": 1, "item": {"file": playlist.m3u}}`)
+- [Player.Open](https://kodi.wiki/view/JSON-RPC_API/v13#Player.Open) (`"params": {"item": {"playlistid": 1}}`)
+- if `index >= 2`, then [Player.GoTo](https://kodi.wiki/view/JSON-RPC_API/v13#Player.GoTo) (`"params": {"playerid": 1, "to": index-1}`)
 
 ## Script
-In this way all needed work is happening in [run_player.au3](https://github.com/Alexey-Tsarev/Lampac_scripts/blob/master/run_player.au3) script:
-- convert URL to download `m3u` playlist
-- download `m3u` playlist
-- remove in `m3u` playlist all links before `index`
-- run Kodi with the resulted `m3u` playlist
+Thus, the [kodi.py](https://github.com/Alexey-Tsarev/Lampac_scripts/blob/master/kodi.py) script does all main work:
+- convert URL to download an `m3u` playlist
+- download an `m3u` playlist
+- run Kodi with the downloaded `m3u` playlist
+- rewinds to the desired file using Player.GoTo
 
-## Example
-In this example, `index=3`.  
-__in.m3u__
+## Python virtualenv
 ```
-#EXTM3U
-#EXTINF:0,NameOfSeriesS03x01.mkv
-http://127.0.0.1:8090/stream/NameOfSeriesS03x01.mkv?link=LINK_ID&index=1&play
-#EXTINF:0,NameOfSeriesS03x02.mkv
-http://127.0.0.1:8090/stream/NameOfSeriesS03x02.mkv?link=LINK_ID&index=2&play
-#EXTINF:0,NameOfSeriesS03x03.mkv
-http://127.0.0.1:8090/stream/NameOfSeriesS03x03.mkv?link=LINK_ID&index=3&play
-#EXTINF:0,NameOfSeriesS03x04.mkv
-http://127.0.0.1:8090/stream/NameOfSeriesS03x04.mkv?link=LINK_ID&index=4&play
-#EXTINF:0,NameOfSeriesS03x05.mkv
-http://127.0.0.1:8090/stream/NameOfSeriesS03x05.mkv?link=LINK_ID&index=5&play
-#EXTINF:0,NameOfSeriesS03x06.mkv
-http://127.0.0.1:8090/stream/NameOfSeriesS03x06.mkv?link=LINK_ID&index=6&play
-#EXTINF:0,NameOfSeriesS03x07.mkv
-http://127.0.0.1:8090/stream/NameOfSeriesS03x07.mkv?link=LINK_ID&index=7&play
-#EXTINF:0,NameOfSeriesS03x08.mkv
-http://127.0.0.1:8090/stream/NameOfSeriesS03x08.mkv?link=LINK_ID&index=8&play
+python -m venv .virtualenv
+.virtualenv\Scripts\activate.bat
+.virtualenv\Scripts\pip install -r requirements.txt
+.virtualenv\Scripts\python.exe kodi.py --help
 ```
 
-__out.m3u__
-```
-#EXTM3U
-#EXTINF:0,NameOfSeriesS03x03.mkv
-http://127.0.0.1:8090/stream/NameOfSeriesS03x03.mkv?link=LINK_ID&index=3&play
-#EXTINF:0,NameOfSeriesS03x04.mkv
-http://127.0.0.1:8090/stream/NameOfSeriesS03x04.mkv?link=LINK_ID&index=4&play
-#EXTINF:0,NameOfSeriesS03x05.mkv
-http://127.0.0.1:8090/stream/NameOfSeriesS03x05.mkv?link=LINK_ID&index=5&play
-#EXTINF:0,NameOfSeriesS03x06.mkv
-http://127.0.0.1:8090/stream/NameOfSeriesS03x06.mkv?link=LINK_ID&index=6&play
-#EXTINF:0,NameOfSeriesS03x07.mkv
-http://127.0.0.1:8090/stream/NameOfSeriesS03x07.mkv?link=LINK_ID&index=7&play
-#EXTINF:0,NameOfSeriesS03x08.mkv
-http://127.0.0.1:8090/stream/NameOfSeriesS03x08.mkv?link=LINK_ID&index=8&play
-```
+## Remote control
+To control Lampac and Kodi, I use the [UGOOS UR02](https://ugoos.com/ugoos-bt-remote-control-ur02) remote.  
+For button bindings and other logic, I use [EventGhost](https://github.com/EventGhost/EventGhost/releases).  
+The EventGhost configuration file: [UGOOS_UR02.xml](https://github.com/Alexey-Tsarev/Lampac_scripts/blob/master/UGOOS_UR02.xml).
 
 ####
 Thanks a lot and good luck,  
-Alexey Tsarev, Tsarev.Alexey at gmail.com
+Alexey Tsarev, Tsarev.Alexey at gmail.com.
